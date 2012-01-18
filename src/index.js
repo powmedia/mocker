@@ -1,6 +1,28 @@
 var _ = require('underscore');
 
 /**
+ * Wraps the given function so that the history log is saved when it is called, and then the given function
+ * is run
+ *
+ * @param {Mocker} mocker     The mocker object
+ * @param {Function} fn       The function to run
+ * @return {Function}         The wrapped function
+ * @api public
+ */
+function wrapFn(mocker, fn) {
+  return function() {
+    //Copy the arguments this function was called with
+    var args = Array.prototype.slice.call(arguments);
+    
+    //Save the arguments to the log
+    mocker.history.push(args);
+    
+    return fn.apply(mocker.obj, arguments);
+  };
+}
+
+
+/**
  * Mocker constructor
  *
  * @param {Object} obj            Object to create a mock of
@@ -17,18 +39,8 @@ function Mocker(obj, methodName, mockFn) {
   this.history = [];
   
   //Assign new function
-  if (mockFn) {
-    obj[methodName] = mockFn;
-  } else {
-    //TODO: Create and assign a function which counts times called, saves args etc.
-    obj[methodName] = (function(mocker) {
-      return function() {
-        var args = Array.prototype.slice.call(arguments);
-        
-        mocker.history.push(args);
-      }
-    })(this);
-  }
+  mockFn = mockFn || this.originalFn;
+  obj[methodName] = wrapFn(this, mockFn);
 };
 
 Mocker.prototype.restore = function() {
@@ -37,6 +49,10 @@ Mocker.prototype.restore = function() {
 
 Mocker.prototype.lastArgs = function() {
   return _.last(this.history);
+};
+
+Mocker.prototype.timesCalled = function() {
+  return this.history.length;
 };
 
 
