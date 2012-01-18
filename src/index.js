@@ -17,7 +17,7 @@ function wrapFn(mocker, fn) {
     //Save the arguments to the log
     mocker.history.push(args);
     
-    return fn.apply(mocker.obj, arguments);
+    return fn.apply(this, arguments);
   };
 }
 

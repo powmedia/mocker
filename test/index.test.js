@@ -48,7 +48,7 @@ exports['mocker'] = {
     
     'for instance method': {
       'maintains correct scope': function(test) {
-        var user = new User('Lana Kang');
+        var user = new User('Lana', 'Kang');
         
         var mock = mocker.mock(user, 'fullName', function(prefix, suffix) {
           return prefix + ' mocked ' + suffix;
@@ -56,7 +56,22 @@ exports['mocker'] = {
         
         test.same(user.fullName('test', 123), 'test mocked 123');
         test.same(user.fullName('test2', '!'), 'test2 mocked !');
-        test.same(mock.timesCalled(), 2);
+
+        test.done();
+      }
+    },
+    
+    'for prototype method': {
+      'maintains correct scope': function(test) {
+        var mock = mocker.mock(User.prototype, 'fullName', function() {
+          return 'mocked:' + this.firstName;
+        });
+        
+        var user1 = new User('Cheryl'),
+            user2 = new User('Sterling');
+        
+        test.same(user1.fullName(), 'mocked:Cheryl');
+        test.same(user2.fullName(), 'mocked:Sterling');
 
         test.done();
       }
