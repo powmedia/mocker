@@ -26,11 +26,12 @@ exports['mocker'] = {
   'mocker.mock() replaces original method with mocked function': {
     'for static/class method': {
       'with original function (wraps original function to save history)': function(test) {
-        var originalFn = User.find;
-
         var mock = mocker.mock(User, 'find');
+        
+        var result = User.find(3);
 
-        test.same(User.find(3).id, 3);
+        test.same(result.id, 3);
+        test.same(mock.timesCalled(), 1);
 
         test.done();
       },
@@ -41,12 +42,41 @@ exports['mocker'] = {
         });
 
         test.same(User.find(), 'mocked');
+        test.same(mock.timesCalled(), 1);
 
         test.done();
       },
     },
     
     'for instance method': {
+      'with original function (wraps original function to save history)': function(test) {
+        var user = new User('Michael', 'Bluth');
+        
+        var mock = mocker.mock(user, 'fullName');
+        
+        var result = user.fullName();
+
+        test.same(result, 'Michael Bluth');
+        test.same(mock.timesCalled(), 1);
+
+        test.done();
+      },
+
+      'with custom function': function(test) {
+        var user = new User('Michael', 'Bluth');
+        
+        var mock = mocker.mock(user, 'fullName', function() {
+          return 'foo';
+        });
+        
+        var result = user.fullName();
+
+        test.same(result, 'foo');
+        test.same(mock.timesCalled(), 1);
+
+        test.done();
+      },
+      
       'maintains correct scope': function(test) {
         var user = new User('Lana', 'Kang');
         
@@ -62,6 +92,18 @@ exports['mocker'] = {
     },
     
     'for prototype method': {
+      'with original function (wraps original function to save history)': function(test) {
+        console.log('******TODO******');
+
+        test.done();
+      },
+
+      'with custom function': function(test) {
+        console.log('******TODO******');
+
+        test.done();
+      },
+      
       'maintains correct scope': function(test) {
         var mock = mocker.mock(User.prototype, 'fullName', function() {
           return 'mocked:' + this.firstName;
@@ -78,8 +120,8 @@ exports['mocker'] = {
     }
   },
   
-  'mock.restore()': {
-    'restores the original method': function(test) {
+  'mock.restore() restores the original method': {
+    'for static/class method': function(test) {
       var originalFn = User.find,
           mockFn = function() { return 'mocked!'; };
 
@@ -91,64 +133,42 @@ exports['mocker'] = {
       test.same(User.find(3).id, 3);
 
       test.done();
-    }
-  },
- 
-  'mock.lastArgs() returns the arguments the function was called with': {
-    'with original function': function(test) {
-      var mock = mocker.mock(User, 'find');
-
-      User.find(123, 'X');
-      test.same(mock.lastArgs(), [123, 'X']);
-
-      User.find(456, 'Y');
-      test.same(mock.lastArgs(), [456, 'Y']);
+    },
+    
+    'for instance method': function(test) {
+      console.log('******TODO******');
 
       test.done();
     },
     
-    'with custom function': function(test) {
-      var mock = mocker.mock(User, 'find', function() {
-        return 'bla';
-      });
-
-      User.find(333, 'A');
-      test.same(mock.lastArgs(), [333, 'A']);
-
-      User.find(555, 'B');
-      test.same(mock.lastArgs(), [555, 'B']);
+    'for prototype method': function(test) {
+      console.log('******TODO******');
 
       test.done();
     }
   },
+ 
+  'mock.lastArgs() returns the arguments the function was called with': function(test) {
+    var mock = mocker.mock(User, 'find');
+
+    User.find(123, 'X');
+    test.same(mock.lastArgs(), [123, 'X']);
+
+    User.find(456, 'Y');
+    test.same(mock.lastArgs(), [456, 'Y']);
+
+    test.done();
+  },
   
-  'mock.timesCalled() returns the number of times the function was called': {
-    'with original function': function(test) {
-      var mock = mocker.mock(User, 'find');
+  'mock.timesCalled() returns the number of times the function was called': function(test) {
+    var mock = mocker.mock(User, 'find');
 
-      User.find(1);
-      User.find(2);
-      User.find(3);
+    User.find(1);
+    User.find(2);
+    User.find(3);
 
-      test.same(mock.timesCalled(), 3);
+    test.same(mock.timesCalled(), 3);
 
-      test.done();
-    },
-
-    'with custom function': function(test) {
-      var mock = mocker.mock(User, 'find', function() {
-        return 'bla';
-      });
-
-      User.find(1);
-      User.find(2);
-      User.find(3);
-      User.find(1);
-      User.find(2);
-
-      test.same(mock.timesCalled(), 5);
-
-      test.done();
-    }
+    test.done();
   },  
 };

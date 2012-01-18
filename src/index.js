@@ -34,7 +34,6 @@ function wrapFn(mocker, fn) {
 function Mocker(obj, methodName, mockFn) {
   this.obj = obj;
   this.methodName = methodName;
-  this.mockFn = mockFn;
   this.originalFn = obj[methodName];
   this.history = [];
   
