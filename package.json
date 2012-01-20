@@ -1,17 +1,18 @@
 {
   "author": "Charles Davison <charlie@powmedia.co.uk>",
   "name": "mocker",
-  "description": "Mocking",
-  "version": "0.0.1",
+  "description": "Javascript mocking",
+  "version": "0.1.1",
   "repository": {
-      "type" : "git", 
-      "url" : "http://github.com/powmedia/mocker.git"
+    "type": "git",
+    "url": "git://github.com/powmedia/mocker.git"
   },
-  "engines": { "node": ">= 0.4.1" },
+  "engines": {
+    "node": ">= 0.4.1"
+  },
   "dependencies": {
-    "underscore": "1.3.0"
   },
-	"devDependencies": {
-		"nodeunit": "0.6.4"
-	}
+  "devDependencies": {
+    "nodeunit": "0.6.4"
+  }
 }

@@ -1,5 +1,3 @@
-var _ = require('underscore');
-
 /**
  * Wraps the given function so that the history log is saved when it is called, and then the given function
  * is run
@@ -47,7 +45,9 @@ Mocker.prototype.restore = function() {
 };
 
 Mocker.prototype.lastArgs = function() {
-  return _.last(this.history);
+  var history = this.history;
+  
+  return history[history.length - 1];
 };
 
 Mocker.prototype.timesCalled = function() {
