@@ -170,5 +170,5 @@ exports['mocker'] = {
     test.same(mock.timesCalled(), 3);
 
     test.done();
-  },  
+  }
 };
