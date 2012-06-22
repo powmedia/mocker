@@ -54,6 +54,7 @@ Mocker.prototype.timesCalled = function() {
   return this.history.length;
 };
 
+var mocks = [];
 
 /**
  * Creates a new Mocker
@@ -65,5 +66,21 @@ Mocker.prototype.timesCalled = function() {
  * @api public
  */
 exports.mock = function(obj, methodName, mockFn) {
-  return new Mocker(obj, methodName, mockFn);
+  var mock = new Mocker(obj, methodName, mockFn);
+  
+  mocks.push(mock);
+  
+  return mock;
 };
+
+/**
+ * Restores all mocks and release
+ *
+ * @api public
+ */
+exports.restore = function(){
+  for (var i = 0; i < mocks.length; i++) {
+    mocks[i].restore();
+  }
+  mocks = [];
+}

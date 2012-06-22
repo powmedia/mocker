@@ -170,5 +170,30 @@ exports['mocker'] = {
     test.same(mock.timesCalled(), 3);
 
     test.done();
-  }
+  },
+
+  'restore() restores all mocks created since last restore': function(test) {
+    mocker.restore();
+    
+    var originalFind = User.find,
+        originalFullName = User.prototype.fullName,
+        mockedString = 'mocked!',
+        mockFind = function() { return mockedString; }
+        mockFullName = mockFind;    
+    
+    var newMocks = [
+      mocker.mock(User, 'find', mockFind),
+      mocker.mock(User.prototype, 'fullName', mockFullName)
+    ];
+    
+    test.same(User.find(), mockedString);
+    test.same((new User('a', 'b')).fullName(), mockedString);
+    
+    mocker.restore();
+    
+    test.same(User.find, originalFind);
+    test.same(User.prototype.fullName, originalFullName);
+    
+    test.done();
+  } 
 };
