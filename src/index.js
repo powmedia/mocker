@@ -1,60 +1,36 @@
 /**
- * Wraps the given function so that the history log is saved when it is called, and then the given function
- * is run
- *
- * @param {Mocker} mocker     The mocker object
- * @param {Function} fn       The function to run
- * @return {Function}         The wrapped function
- * @api public
+ * Module dependencies
  */
-function wrapFn(mocker, fn) {
-  return function() {
-    //Copy the arguments this function was called with
-    var args = Array.prototype.slice.call(arguments);
-    
-    //Save the arguments to the log
-    mocker.history.push(args);
-    
-    return fn.apply(this, arguments);
-  };
-}
+var sinon = require('sinon');
 
+// [22/06/2012 11:33:45] Charles: var sinon = require('sinon');
+// 
+// setUp: function(done) {
+//   this.sinon = sinon.sandbox.create();
+//   done();
+// },
+// 
+// tearDown: function(done) {
+//   this.sinon.restore();
+//   done();
+// },
+// 
+// main: function(test) {
+//   //Just watch a method, without replacing it:
+//   this.sinon.spy(User, 'find');
+// 
+//   //Replace a method like in mocker:
+//   this.sinon.stub(User, 'find', function(criteria, cb) {
+//     cb(null, {foo: 'bar'});
+//   });
+// 
+//   //Test something:
+//   test.ok(User.find.called);
+// 
+//   console.log(User.find.args[0]);
+// }
 
-/**
- * Mocker constructor
- *
- * @param {Object} obj            Object to create a mock of
- * @param {String} methodName     Method name to mock
- * @param {Function} mockFn       Mock function
- * @return {Mocker}
- * @api public
- */
-function Mocker(obj, methodName, mockFn) {
-  this.obj = obj;
-  this.methodName = methodName;
-  this.originalFn = obj[methodName];
-  this.history = [];
-  
-  //Assign new function
-  mockFn = mockFn || this.originalFn;
-  obj[methodName] = wrapFn(this, mockFn);
-};
-
-Mocker.prototype.restore = function() {
-  this.obj[this.methodName] = this.originalFn;
-};
-
-Mocker.prototype.lastArgs = function() {
-  var history = this.history;
-  
-  return history[history.length - 1];
-};
-
-Mocker.prototype.timesCalled = function() {
-  return this.history.length;
-};
-
-var mocks = [];
+exports.sandbox = sinon.sandbox.create();
 
 /**
  * Creates a new Mocker
@@ -65,13 +41,26 @@ var mocks = [];
  * @return {Mocker}
  * @api public
  */
-exports.mock = function(obj, methodName, mockFn) {
-  var mock = new Mocker(obj, methodName, mockFn);
+
+exports.mock = function() {
+  var methodName = (arguments.length > 2) ? 'stub' : 'spy';
   
-  mocks.push(mock);
+  var mock = exports.sandbox[methodName].apply(exports.sandbox, arguments);
+
+  mock.lastArgs = function(){
+    return mock.args[mock.args.length - 1];
+  };
   
-  return mock;
-};
+  mock.__defineGetter__('history', function(){
+    return mock.args;
+  });
+  
+  mock.timesCalled = function(){
+    return mock.callCount;
+  };
+  
+  return mock;  
+}
 
 /**
  * Restores all mocks and release
@@ -79,8 +68,6 @@ exports.mock = function(obj, methodName, mockFn) {
  * @api public
  */
 exports.restore = function(){
-  for (var i = 0; i < mocks.length; i++) {
-    mocks[i].restore();
-  }
-  mocks = [];
+  exports.sandbox.restore();
+  exports.sandbox = sinon.sandbox.create();
 }
